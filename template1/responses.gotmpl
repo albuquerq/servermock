@@ -1,0 +1,15 @@
+// Code generated at {{ now }} DO NOT EDIT.
+package {{ .DataPackage }}
+
+{{ $handler := .Data -}}
+{{ range .Data.Responses -}}
+{{ $bodyContent := file .Body -}}
+{{ if $bodyContent -}}
+// {{ $handler.Name }}{{ .Name }} is returned with status code {{.StatusCode }}.
+const {{ $handler.Name }}{{ .Name }} = `{{ $bodyContent | minifyjson }}`
+{{ else -}}
+// {{ $handler.Name }}{{ .Name }} file "{{ .Body }}" empty or not found.
+const {{ $handler.Name }}{{ .Name }} = ``
+{{ end }}
+{{ end }}
+

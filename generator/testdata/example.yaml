@@ -1,0 +1,24 @@
+version: 1
+server:
+    base_url: "https://example.example"
+    handlers:
+    - name: "AddPet"
+      method: "POST"
+      path: "/pet"
+      headers:
+        content-type: "application/json"
+      requests: # Optional.
+        - name: "AddPet"
+          body: "add_pet_request.json"
+
+      responses:
+        - name: "StatusOk"
+          description: > # Optional.
+            Description here.
+          status_code: 200
+          headers: # Optional.
+            "x-request-id": "1014a3f5-c703-44b7-8752-dfcefe497f68"
+          body: "./testdata/add_pet_status_ok_response.json"
+
+        - name: "StatusInvalidInput"
+          status_code: 405

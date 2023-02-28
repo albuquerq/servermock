@@ -1,0 +1,23 @@
+// Code generated at {{ now }} DO NOT EDIT.
+package {{ .Package }}
+
+import (
+	"net/http"
+
+	"{{ .Module }}/{{ .Package }}/{{ .DataPackage }}"
+)
+{{- $handler := .Data }}
+{{ range .Data.Responses }}
+{{ if .Description -}}
+// {{ $handler.Name }}{{ .Name }} {{ .Description }}
+{{- end -}}
+func {{ $handler.Name }}{{ .Name }}(w http.ResponseWriter, _ *http.Request) {
+{{- range $h, $v := $handler.Headers }}
+	w.Header().Set("{{ $h }}", "{{ $v }}")
+{{- end }}
+{{- range $h, $v := .Headers }}
+	w.Header().Set("{{ $h }}", "{{ $v }}")
+{{- end }}
+	sendResponse(w, {{ $.DataPackage }}.{{ $handler.Name }}{{ .Name }}, {{ .StatusCode }})
+}
+{{ end }}
