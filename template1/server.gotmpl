@@ -1,0 +1,50 @@
+// Code generated at {{ now }} DO NOT EDIT.
+package {{ .Package }}
+
+import (
+	"net/http"
+	"net/http/httptest"
+
+	"github.com/go-chi/chi/v5"
+)
+
+type {{ .TypeName }} struct {
+	*httptest.Server
+	// handlers.
+
+{{- range .Data.Handlers }}
+	{{ .Name }} http.HandlerFunc // [{{ .Method }}] {{ .Path }}
+{{- end }}
+}
+
+func New{{ .TypeName }}() *{{ .TypeName }} {
+	srv := &{{ .TypeName }}{
+		// handlers.
+{{- range $handler := .Data.Handlers }}
+	{{- with index $handler.Responses 0}}
+		{{ $handler.Name }}: {{ $handler.Name }}{{ .Name }},
+	{{- end }}
+{{- end }}
+	}
+	srv.initialize()
+	return srv
+}
+
+func (fs *{{ .TypeName }}) initialize() {
+	router := chi.NewRouter()
+{{ range $handler := .Data.Handlers }}
+	{{- with index $handler.Responses 0}}
+	router.Method("{{ $handler.Method}}", "{{ $handler.Path }}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fs.{{ $handler.Name }}(w, r)
+		fs.{{ $handler.Name }} = {{ $handler.Name }}{{ .Name }}
+	}))
+	{{- end }}
+{{- end }}
+
+	fs.Server = httptest.NewServer(router)
+}
+
+func sendResponse(w http.ResponseWriter, payload string, statusCode int) { //nolint
+	w.WriteHeader(statusCode)
+	_, _ = w.Write([]byte(payload))
+}
