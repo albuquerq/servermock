@@ -1,7 +1,7 @@
 version: 1
 server:
-    base_url: "https://example.example"
-    handlers:
+  base_url: "https://example.example"
+  handlers:
     - name: "AddPet"
       method: "POST"
       path: "/pet"

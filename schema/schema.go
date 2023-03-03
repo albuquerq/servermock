@@ -3,6 +3,7 @@ package schema
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -28,6 +29,15 @@ type Handler struct {
 	Responses []Response        `yaml:"responses"`
 }
 
+func (h Handler) ContentType() string {
+	for k, v := range h.Headers {
+		if strings.ToLower(k) == "content-type" {
+			return v
+		}
+	}
+	return "text/plain"
+}
+
 type Request struct {
 	Name     string `yaml:"name"`
 	BodyFile string `yaml:"body"`
@@ -39,6 +49,15 @@ type Response struct {
 	StatusCode  int               `yaml:"status_code"`
 	Headers     map[string]string `yaml:"headers"`
 	Body        string            `yaml:"body"`
+}
+
+func (r Response) ContentType() string {
+	for k, v := range r.Headers {
+		if strings.ToLower(k) == "content-type" {
+			return v
+		}
+	}
+	return "text/plain"
 }
 
 func Parse(r io.Reader) (Schema, error) {
