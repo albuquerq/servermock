@@ -1,4 +1,4 @@
-// Code generated at 2023-02-28T12:11:21-03:00 DO NOT EDIT.
+// Code generated at by github.com/albuquerq/servermock DO NOT EDIT.
 package petshpdata
 
 // AddPetStatusOk is returned with status code 200.
