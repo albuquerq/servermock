@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/albuquerq/servermock/schema"
 	"github.com/albuquerq/servermock/template1"
@@ -53,7 +52,6 @@ func Generate(cfg Config, s schema.Schema, folder string) error {
 	t := template.New("root").Funcs(template.FuncMap{
 		"file":       readFile,
 		"minifyjson": minifyjson,
-		"now":        now,
 	})
 
 	t, err := t.ParseFS(template1.FS, "*.gotmpl")
@@ -124,10 +122,6 @@ func readFile(fileName string) string {
 		return ""
 	}
 	return string(data)
-}
-
-func now() string {
-	return time.Now().Format(time.RFC3339)
 }
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
