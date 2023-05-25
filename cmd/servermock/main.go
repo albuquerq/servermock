@@ -77,10 +77,11 @@ func main() {
 
 	err = generator.Generate(
 		generator.Config{
-			ModulePath:  arg.ProjectModule,
-			Package:     arg.Package,
-			DataPackage: arg.DataPackage,
-			TypeName:    arg.TypeName,
+			ModulePath:      arg.ProjectModule,
+			Package:         arg.Package,
+			DataPackage:     arg.DataPackage,
+			TypeName:        arg.TypeName,
+			UseStackHandler: arg.StackHandler,
 		},
 		s,
 		arg.OutputFolder,
