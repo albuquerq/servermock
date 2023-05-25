@@ -24,10 +24,11 @@ func TestGenerate(t *testing.T) {
 
 	err = Generate(
 		Config{
-			ModulePath:  "github.com/albuquerq/fakeserver",
-			Package:     "petshop",
-			DataPackage: "petshpdata",
-			TypeName:    "FakeServer",
+			ModulePath:      "github.com/albuquerq/fakeserver",
+			Package:         "petshop",
+			DataPackage:     "petshpdata",
+			TypeName:        "FakeServer",
+			UseStackHandler: false,
 		},
 		schm,
 		folder,
