@@ -17,26 +17,29 @@ import (
 )
 
 type environment struct {
-	Module      string
-	Package     string
-	DataPackage string
-	TypeName    string
-	Data        any
+	Module          string
+	Package         string
+	DataPackage     string
+	TypeName        string
+	Data            any
+	UseStackHandler bool
 }
 
 type Config struct {
-	ModulePath  string
-	Package     string
-	DataPackage string
-	TypeName    string
+	ModulePath      string
+	Package         string
+	DataPackage     string
+	TypeName        string
+	UseStackHandler bool
 }
 
 func createEnvironment(cfg Config) environment {
 	return environment{
-		Module:      cfg.ModulePath,
-		Package:     cfg.Package,
-		TypeName:    cfg.TypeName,
-		DataPackage: cfg.DataPackage,
+		Module:          cfg.ModulePath,
+		Package:         cfg.Package,
+		TypeName:        cfg.TypeName,
+		DataPackage:     cfg.DataPackage,
+		UseStackHandler: cfg.UseStackHandler,
 	}
 }
 
@@ -108,11 +111,12 @@ func Generate(cfg Config, s schema.Schema, folder string) error {
 
 func (e environment) With(data any) environment {
 	return environment{
-		Package:     e.Package,
-		DataPackage: e.DataPackage,
-		Module:      e.Module,
-		TypeName:    e.TypeName,
-		Data:        data,
+		Package:         e.Package,
+		DataPackage:     e.DataPackage,
+		Module:          e.Module,
+		TypeName:        e.TypeName,
+		UseStackHandler: e.UseStackHandler,
+		Data:            data,
 	}
 }
 

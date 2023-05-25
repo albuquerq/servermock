@@ -12,8 +12,8 @@ type {{ .TypeName }} struct {
 	*httptest.Server
 	// handlers.
 
-{{- range .Data.Handlers }}
-	{{ .Name }} http.HandlerFunc // [{{ .Method }}] {{ .Path }}
+{{- range $handler := .Data.Handlers }}
+	{{ $handler.Name }} {{ if $.UseStackHandler }}*StackHandler{{ else }}http.HandlerFunc{{ end }} // [{{ $handler.Method }}] {{ $handler.Path }}
 {{- end }}
 }
 
@@ -22,7 +22,7 @@ func New{{ .TypeName }}() *{{ .TypeName }} {
 		// handlers.
 {{- range $handler := .Data.Handlers }}
 	{{- with index $handler.Responses 0}}
-		{{ $handler.Name }}: {{ $handler.Name }}{{ .Name }},
+		{{ $handler.Name }}: {{ if $.UseStackHandler}} NewStackHandler({{ $handler.Name}}{{.Name}}){{ else }}{{ $handler.Name }}{{ .Name }}{{ end }},
 	{{- end }}
 {{- end }}
 	}
@@ -34,10 +34,14 @@ func (fs *{{ .TypeName }}) initialize() {
 	router := chi.NewRouter()
 {{ range $handler := .Data.Handlers }}
 	{{- with index $handler.Responses 0}}
+		{{- if $.UseStackHandler }}
+	router.Method("{{ $handler.Method}}", "{{ $handler.Path }}", fs.{{ $handler.Name }})
+		{{- else }}
 	router.Method("{{ $handler.Method}}", "{{ $handler.Path }}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fs.{{ $handler.Name }}(w, r)
 		fs.{{ $handler.Name }} = {{ $handler.Name }}{{ .Name }}
 	}))
+		{{- end }}
 	{{- end }}
 {{- end }}
 
@@ -48,3 +52,65 @@ func sendResponse(w http.ResponseWriter, payload string, statusCode int) { //nol
 	w.WriteHeader(statusCode)
 	_, _ = w.Write([]byte(payload))
 }
+
+{{ if .UseStackHandler }}
+type StackHandler struct {
+	pool []http.HandlerFunc
+	base http.HandlerFunc
+}
+
+func NewStackHandler(base http.HandlerFunc) *StackHandler {
+	if base == nil {
+		base = func(http.ResponseWriter, *http.Request) {}
+	}
+	return &StackHandler{
+		base: base,
+	}
+}
+
+func (hp *StackHandler) pop() http.HandlerFunc {
+	if hp == nil {
+		hp = newEmpty()
+	}
+
+	if len(hp.pool) == 0 {
+		return hp.base
+	}
+	idx := len(hp.pool) - 1
+
+	h := hp.pool[idx]
+	hp.pool = hp.pool[:idx]
+
+	return h
+}
+
+func (hp *StackHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if hp == nil {
+		hp = newEmpty()
+	}
+	hp.pop().ServeHTTP(w, r)
+}
+
+func (hp *StackHandler) Push(h http.HandlerFunc) {
+	if h == nil {
+		return
+	}
+	if hp == nil {
+		hp = newEmpty()
+	}
+	hp.pool = append(hp.pool, h)
+}
+
+func (hp *StackHandler) Reset() {
+	if hp == nil {
+		hp = newEmpty()
+	}
+	hp.pool = []http.HandlerFunc{}
+}
+
+func newEmpty() *StackHandler {
+	return &StackHandler{
+		base: func(http.ResponseWriter, *http.Request) {},
+	}
+}
+{{- end }}

@@ -17,6 +17,7 @@ func init() {
 	flag.StringVar(&arg.Package, "pkg", "apimock", "name for the geneated package.")
 	flag.StringVar(&arg.DataPackage, "pkgdata", "testdata", "name for the generated data package.")
 	flag.StringVar(&arg.TypeName, "gotype", "ServerMock", "go type name for the mock.")
+	flag.BoolVar(&arg.StackHandler, "stack", false, "enable stack handler.")
 }
 
 type args struct {
@@ -26,6 +27,7 @@ type args struct {
 	Package        string
 	DataPackage    string
 	TypeName       string
+	StackHandler   bool
 }
 
 func (a args) validate() error {
