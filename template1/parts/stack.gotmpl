@@ -1,7 +1,26 @@
-package handlers
+{{ define "handlers-definitions" }}
+{{- range . }}
+	{{ .Name }} *StackHandler // [{{ .Method }}] {{ .Path }}
+{{- end }}
+{{ end }}
 
-import "net/http"
+{{ define "handlers-assignments" }}
+{{- range $handler := . }}
+	{{- with index $handler.Responses 0}}
+		{{ $handler.Name }}: NewStackHandler({{ $handler.Name}}{{.Name}}),
+	{{- end }}
+{{- end }}
+{{ end }}
 
+{{ define "handlers-initialization" }}
+{{ range $handler := . }}
+	{{- with index $handler.Responses 0}}
+	router.Method("{{ $handler.Method}}", "{{ $handler.Path }}", fs.{{ $handler.Name }})
+	{{- end }}
+{{- end }}
+{{ end }}
+
+{{- define "handlers-extra-code" }}
 type StackHandler struct {
 	stack []http.HandlerFunc
 	base  http.HandlerFunc
@@ -61,3 +80,4 @@ func (sh *StackHandler) Reset() {
 	}
 	sh.stack = []http.HandlerFunc{}
 }
+{{- end }}

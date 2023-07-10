@@ -1,5 +1,5 @@
 // Code generated at by github.com/albuquerq/servermock DO NOT EDIT.
-package petshop
+package {{ .Package }}
 
 import (
 	"net/http"
@@ -8,27 +8,23 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type FakeServer struct {
+type {{ .TypeName }} struct {
 	*httptest.Server
-
-	AddPet http.HandlerFunc // [POST] /pet
+	{{ template "handlers-definitions" .Data.Handlers -}}
 }
 
-func NewFakeServer() *FakeServer {
-	srv := &FakeServer{
-		AddPet: AddPetStatusOk,
+func New{{ .TypeName }}() *{{ .TypeName }} {
+	srv := &{{ .TypeName }}{
+        {{- template "handlers-assignments" .Data.Handlers }}
 	}
 	srv.initialize()
 	return srv
 }
 
-func (fs *FakeServer) initialize() {
+func (fs *{{ .TypeName }}) initialize() {
 	router := chi.NewRouter()
 
-	router.Method("POST", "/pet", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fs.AddPet(w, r)
-		fs.AddPet = AddPetStatusOk
-	}))
+    {{ template "handlers-initialization" .Data.Handlers }}
 
 	fs.Server = httptest.NewServer(router)
 }
@@ -37,3 +33,5 @@ func sendResponse(w http.ResponseWriter, payload string, statusCode int) { //nol
 	w.WriteHeader(statusCode)
 	_, _ = w.Write([]byte(payload))
 }
+
+{{ template "handlers-extra-code" }}

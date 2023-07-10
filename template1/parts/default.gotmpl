@@ -1,0 +1,26 @@
+{{ define "handlers-definitions" }}
+{{- range . }}
+	{{ .Name }} http.HandlerFunc // [{{ .Method }}] {{ .Path }}
+{{- end }}
+{{ end }}
+
+{{ define "handlers-assignments" }}
+{{- range $handler := . }}
+	{{- with index $handler.Responses 0}}
+		{{ $handler.Name }}: {{ $handler.Name }}{{ .Name }},
+	{{- end }}
+{{- end }}
+{{ end }}
+
+{{ define "handlers-initialization" }}
+{{ range $handler := . }}
+	{{- with index $handler.Responses 0}}
+	router.Method("{{ $handler.Method }}", "{{ $handler.Path }}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fs.{{ $handler.Name }}(w, r)
+		fs.{{ $handler.Name }} = {{ $handler.Name }}{{ .Name }}
+	}))
+    {{- end }}
+{{- end }}
+{{ end }}
+
+{{ define "handlers-extra-code" }}{{end}}
