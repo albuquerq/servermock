@@ -1,4 +1,4 @@
-package temp
+package handlers
 
 import (
 	"fmt"
@@ -41,11 +41,11 @@ func TestStackHandler(t *testing.T) {
 			fmt.Fprint(w, "hello with 0")
 		})
 
-		h.Push(func(w http.ResponseWriter, _ *http.Request) {
+		h.Add(func(w http.ResponseWriter, _ *http.Request) {
 			fmt.Fprint(w, "hello with 1")
 		})
 
-		h.Push(func(w http.ResponseWriter, _ *http.Request) {
+		h.Add(func(w http.ResponseWriter, _ *http.Request) {
 			fmt.Fprint(w, "hello with 2")
 		})
 
