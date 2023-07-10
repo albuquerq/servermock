@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -17,7 +18,7 @@ func init() {
 	flag.StringVar(&arg.Package, "pkg", "apimock", "name for the geneated package.")
 	flag.StringVar(&arg.DataPackage, "pkgdata", "testdata", "name for the generated data package.")
 	flag.StringVar(&arg.TypeName, "gotype", "ServerMock", "go type name for the mock.")
-	flag.BoolVar(&arg.StackHandler, "stack", false, "enable stack handler.")
+	flag.StringVar(&arg.HandlerType, "ht", "default", "Handler type [default|queue|stack]")
 }
 
 type args struct {
@@ -27,7 +28,7 @@ type args struct {
 	Package        string
 	DataPackage    string
 	TypeName       string
-	StackHandler   bool
+	HandlerType    string
 }
 
 func (a args) validate() error {
@@ -49,6 +50,13 @@ func (a args) validate() error {
 	if a.TypeName == "" {
 		return errors.New("missing value of argument \"gotype\"")
 	}
+
+	if a.HandlerType != "" {
+		if _, err := generator.ParseHandlerType(a.HandlerType); err != nil {
+			return fmt.Errorf("invalid value of argument \"ht\"")
+		}
+	}
+
 	return nil
 }
 
@@ -75,13 +83,23 @@ func main() {
 		return
 	}
 
+	handlerType := generator.TypeDefault
+
+	if len(arg.HandlerType) > 0 {
+		handlerType, err = generator.ParseHandlerType(arg.HandlerType)
+		if err != nil {
+			log.Printf("failed to parsing arguments: %v", err)
+			return
+		}
+	}
+
 	err = generator.Generate(
 		generator.Config{
-			ModulePath:      arg.ProjectModule,
-			Package:         arg.Package,
-			DataPackage:     arg.DataPackage,
-			TypeName:        arg.TypeName,
-			UseStackHandler: arg.StackHandler,
+			ModulePath:  arg.ProjectModule,
+			Package:     arg.Package,
+			DataPackage: arg.DataPackage,
+			TypeName:    arg.TypeName,
+			HandlerType: handlerType,
 		},
 		s,
 		arg.OutputFolder,
